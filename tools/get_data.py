@@ -157,6 +157,7 @@ if __name__ == "__main__":
     test_labels_dir = "data/test/labels"
 
     # Create directories if they don't exist
+    print("Creating/Emptying Directories...")
     create_empty_dir(train_image_dir)
     create_empty_dir(train_labels_dir)
     create_empty_dir(val_image_dir)

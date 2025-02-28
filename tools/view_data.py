@@ -53,6 +53,11 @@ if __name__ == "__main__":
     image_files = os.listdir(image_dir)
     label_files = os.listdir(label_dir)
 
+    print("Viewing Images and Labels in the dataset")
+    print("Navigate to /tools/display.png to view the image")
+    print("Press 'q' to quit or any other key to view another image")
+    print("\n\n")
+
     # Read the categories
     with open("data/categories.txt", "r") as f:
         categories = f.readlines()
