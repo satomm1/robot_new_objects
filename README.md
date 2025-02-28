@@ -21,7 +21,7 @@ If using a GPU you must install [PyTorch](https://pytorch.org/get-started/locall
 export GEMINI_API_KEY=<YOUR_API_KEY>
 source ~/.bashrc
 ```
-## Downloading Data
+## Downloading and Sorting Data
 We use the COCO 2017 dataset (train:18GB, val:1GB). To download the data, perform the following:
 ```
 mkdir coco && cd coco && mkdir 2017 && mkdir OSOD && cd 2017 && mkdir images
@@ -36,17 +36,31 @@ unzip <filename>.zip
 Make sure the data is in the correct location (`mv val2017 images && mv train2017 images`):
 ```
 coco/
-├── 2017
-│   ├── images
-│   │   ├── val2017
-│   │   │   └── <val images here>
-│   │   └── train2017
-│   │       └── <train images here>
-│   └── annotations
-│       └── <annotation json files here>
-└── OSOD
-    ├──
-    | 
-    └──
+└── 2017
+    ├── images
+    │   ├── val2017
+    │   │   └── <val images here>
+    │   └── train2017
+    │       └── <train images here>
+    └── annotations
+        └── <annotation json files here>
 ```
-Next, we sort the images according to objects found in the office setting. Run the ___ script.
+Next, we sort the images according to objects found in the office setting. Run the `create_data.sh` script:
+```
+. create_data.sh
+```
+This file will automatically split the data and allow you to view some of the data to verify data is correctly saved. The data will be saved to the following directories:
+```
+data/
+├── train
+│   ├── images
+│   └── labels
+├── val
+│   ├── images
+│   └── labels
+├── test
+│   ├── images
+│   └── labels
+└── categories.txt
+```
+The `categories.txt` files will show the mappings of object name to object id for this task.
