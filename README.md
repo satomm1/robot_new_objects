@@ -33,7 +33,7 @@ Then, unzip the folders:
 ```
 unzip <filename>.zip
 ```
-Make sure the data is in the correct location:
+Make sure the data is in the correct location (`mv val2017 images && mv train2017 images`):
 ```
 coco/
 ├── 2017
@@ -49,3 +49,4 @@ coco/
     | 
     └──
 ```
+Next, we sort the images according to objects found in the office setting. Run the ___ script.
