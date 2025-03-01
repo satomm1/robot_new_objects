@@ -2,6 +2,8 @@
 
 This is the code for the [] submitted to the ASME 2025 conference. In this paper, we ...
 
+This `main` branch contains code for training models, while the `noetic` branch contains ROS code for deploying on mobile robots.
+
 ## Installation (Linux)
 **Step 1**: Clone this repo
 ```
@@ -54,7 +56,7 @@ This file will automatically split the data and allow you to view some of the da
 data/
 ├── train
 │   ├── images
-│   └── labels
+│   └── coco_labels
 ├── val
 │   ├── images
 │   └── labels
@@ -64,3 +66,23 @@ data/
 └── categories.txt
 ```
 The `categories.txt` files will show the mappings of object name to object id for this task.
+
+## Produce Unknown Labels with Gemini
+To use Gemini to produce extra unknown object bounding boxes, run the following python code:
+```
+python3 tools/get_gemini_boxes.py --start <start_num> --end <end_num> --task query
+```
+This code will query gemini for unknown objects and place them in the `data/train/labels_gemini_full` directory. You can use `--start` and `--end` to choose what intervals to do, and run this script concurrently to speed up the query process.
+
+After querying, combine the coco labels with the gemini labels with:
+```
+python3 tools/get_gemini_boxes.py --task combine
+```
+This script with compare gemini boxes to coco boxes, remove any repeated boxes, and merge them into the `/data/train/labels` directory.
+
+## Train the model
+Train the OSOD model by running:
+```
+. train.sh
+```
+Now that you have a trained model, we can deploy the model on the mobile robot. Clone this repo to your edge device and change branche via `git checkout noetic`. Follow the instructions in the `README` of that branch for further details.

@@ -41,14 +41,15 @@ if __name__ == "__main__":
     def parse_args():
         parser = argparse.ArgumentParser(description="View images and labels in the dataset")
         parser.add_argument('--split', type=str, choices=['train', 'val', 'test'], required=True, help='Directory containing images')
+        parser.add_argument('--labels-set', default='coco_labels', help='Directory containing labels')
         return parser.parse_args()
 
     args = parse_args()
     split = args.split
-
+    labels_set = args.labels_set
 
     image_dir = f"data/{split}/images"
-    label_dir = f"data/{split}/labels"
+    label_dir = f"data/{split}/{labels_set}"
 
     image_files = os.listdir(image_dir)
     label_files = os.listdir(label_dir)

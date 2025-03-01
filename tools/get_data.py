@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image
 import tqdm 
 
+from utils.utils import create_empty_dir
+
 # 1: person, 15: bench, 27: backpack, 31: handbag, 62: chair, 64: potted plant, 73: laptop, 74: mouse, 76: keyboard, 77: cell phone
 COCO_LABELS = [1, 15, 27, 31, 62, 64, 73, 74, 76, 77]
 
@@ -14,15 +16,6 @@ This file is used to filter the images/filters that are used in this project.
 Since we train on only a subset of COCO, we only need the images/labels associated
 with the classes we are interested in.
 """
-
-def create_empty_dir(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    else:
-        # Remove all files in the directory
-        for file in os.listdir(directory):
-            os.remove(os.path.join(directory, file))
-
 
 def read_coco_labels(labels_file):
     # Read the json file
@@ -58,7 +51,7 @@ def copy_images_and_labels(src_image_dir, dest_image_dir, labels_file, dest_labe
         print("Copying \"train\" images and labels...")
         coco_train_dir = os.path.join(src_image_dir, "train2017")
         copy_images(train_images, coco_train_dir, os.path.join(dest_image_dir, "train", "images"))
-        copy_labels(train_images, labels_file, coco_train_dir, os.path.join(dest_labels_dir, "train", "labels"))
+        copy_labels(train_images, labels_file, coco_train_dir, os.path.join(dest_labels_dir, "train", "coco_labels"))
 
         print("Copying \"val\" images and labels...")
         copy_images(val_images, coco_train_dir, os.path.join(dest_image_dir, "val", "images"))
@@ -95,7 +88,7 @@ def copy_labels(images, labels_file, image_dir, dest_dir):
         category = label["category_id"]
 
         # Keep track of images that have labels of interest
-        if category in COCO_LABELS and image_id in images:
+        if image_id in images:
             # Write or append to txt file in the format: class x_center y_center width height
             bbox = label["bbox"]
             x1, y1, width, height = bbox
@@ -116,7 +109,10 @@ def copy_labels(images, labels_file, image_dir, dest_dir):
 
             # Write to file
             label_file = os.path.join(dest_dir, image_name.replace(".jpg", ".txt"))
-            remapped_category = COCO_LABELS.index(category) + 1  # +1 since reserve 0 for unknown objects
+            if category in COCO_LABELS:
+                remapped_category = COCO_LABELS.index(category) + 1  # +1 since reserve 0 for unknown objects
+            else:
+                remapped_category = 0
             with open(label_file, "a") as f:
                 f.write(f"{remapped_category} {xc} {yc} {width} {height}\n")
 
@@ -131,12 +127,41 @@ def save_remapped_categories(annotations_file):
 
     # Saves the remapped categories to a txt file
     with open("data/categories.txt", "w") as f:
+        f.write("0 unknown\n")
         for i, category in enumerate(COCO_LABELS):
             for j in range(len(categories)):
                 if categories[j]["id"] == category:
                     f.write(f"{i+1} {categories[j]['name']}\n")
                     break
 
+
+def save_data_yaml_file(annotations_file):
+    """
+    Saves the yaml file needed for YOLO training
+    """
+    # Read the annotations file
+    with open(annotations_file) as f:
+        data = json.load(f)
+    categories = data["categories"]
+
+
+    with open("tools/data.yaml", "w") as f:
+        f.write("# Data file for YOLO training\n")
+        f.write("path: ../data\n")
+        f.write("train: train/images\n")
+        f.write("val: val/images\n")
+        f.write("test: test/images  # (optional)\n")
+
+        f.write("\n")
+        f.write("names:\n")
+        f.write("  0: unknown\n")
+
+        for i, category in enumerate(COCO_LABELS):
+            for j in range(len(categories)):
+                if categories[j]["id"] == category:
+                    f.write(f"  {i+1}: {categories[j]['name']}\n")
+                    break
+        
 
 if __name__ == "__main__":
 
@@ -149,6 +174,7 @@ if __name__ == "__main__":
     # Directory to where we want to save the filtered images/labels
     train_image_dir = "data/train/images"
     train_labels_dir = "data/train/labels"
+    train_coco_labels = "data/train/coco_labels"
 
     val_image_dir = "data/val/images"
     val_labels_dir = "data/val/labels"
@@ -160,6 +186,7 @@ if __name__ == "__main__":
     print("Creating/Emptying Directories...")
     create_empty_dir(train_image_dir)
     create_empty_dir(train_labels_dir)
+    create_empty_dir(train_coco_labels)
     create_empty_dir(val_image_dir)
     create_empty_dir(val_labels_dir)
     create_empty_dir(test_image_dir)
@@ -175,3 +202,5 @@ if __name__ == "__main__":
 
     # Save the remapped categories
     save_remapped_categories(os.path.join(coco_annotation_dir, "instances_train2017.json"))
+
+    save_data_yaml_file(os.path.join(coco_annotation_dir, "instances_train2017.json"))
