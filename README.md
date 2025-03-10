@@ -85,4 +85,10 @@ Train the OSOD model by running:
 ```
 . train.sh
 ```
-Now that you have a trained model, we can deploy the model on the mobile robot. Clone this repo to your edge device and change branche via `git checkout noetic`. Follow the instructions in the `README` of that branch for further details.
+After training, move the model weights into the `/weights` directory with name `best.pt`. Evaluate the model by running:
+```
+. eval.sh
+```
+
+## Deploying the model
+...
