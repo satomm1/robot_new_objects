@@ -82,6 +82,41 @@ def copy_new_labels(new_image_dir, new_label_dir, train_image_dir, train_label_d
                     class_id = 0
                 f.write(f"{class_id} {x_center} {y_center} {bbox_width} {bbox_height}\n")
 
+
+def copy_test(test_src_image_dir, test_src_label_dir, test_image_dir, test_label_dir):
+    """
+    Copy all files from src_dir to dest_dir.
+    """
+
+    image_names = os.listdir(test_src_image_dir)
+    for image_name in tqdm.tqdm(image_names):
+        # Get the image path
+        image_path = os.path.join(test_src_image_dir, image_name)
+        label_path = os.path.join(test_src_label_dir, image_name.replace(".jpg", ".txt"))
+
+        # Copy the image
+        shutil.copy(image_path, test_image_dir)
+
+        # Read the label file
+        with open(label_path, "r") as f:
+            lines = f.readlines()
+
+        # Create a new label file
+        new_label_path = os.path.join(test_label_dir, image_name.replace(".jpg", ".txt"))
+        with open(new_label_path, "w") as f:
+            for line in lines:
+                entries = line.split()
+                class_num = entries[0]
+                x_center = entries[1]
+                y_center = entries[2]
+                bbox_width = entries[3]
+                bbox_height = entries[4]
+
+                if int(class_num) == 0:
+                    class_id = len(KNOWN_NAMES) + 1
+                    f.write(f"{class_id} {x_center} {y_center} {bbox_width} {bbox_height}\n")
+
+
 if __name__ == "__main__":
 
     # Set the seed
@@ -132,3 +167,7 @@ if __name__ == "__main__":
     # Now copy the new images and labels to the updated_data directory
     print("Copying new images and labels...")
     copy_new_labels(new_image_dir, new_label_dir, train_image_dir, train_labels_dir, val_image_dir, val_labels_dir)
+
+    # Now copy the test images and labels to the updated_data directory
+    print("Copying test images and labels...")
+    copy_test("updated_data/cone_data/test_images", "updated_data/cone_data/test_labels", test_image_dir, test_labels_dir)
