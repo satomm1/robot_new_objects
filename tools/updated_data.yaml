@@ -1,0 +1,19 @@
+# Data file for YOLO training
+path: ../updated_data
+train: train/images
+val: val/images
+test: test/images  # (optional)
+
+names:
+  0: unknown
+  1: person
+  2: bench
+  3: backpack
+  4: handbag
+  5: chair
+  6: potted plant
+  7: laptop
+  8: mouse
+  9: keyboard
+  10: cell phone
+  11: cone
