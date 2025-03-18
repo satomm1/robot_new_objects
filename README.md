@@ -1,8 +1,12 @@
-# [Title]
+# A Mobile Robot Framework For Learning To Detect New Objects With Large Language Models
 
-This is the code for the [] submitted to the ASME 2025 conference. In this paper, we ...
+This is the source code for the DETC2025-164474 paper submitted to the ASME 2025 IDETC-CIE conference. In this paper, we develop a fast open set object detector for mobile robots. An LLM is used for providing unknown object names and semantics. To identify repeated unknown objects, a MobileCLIP based solution is implemented. Last, we demonstrate incremental learning by automatically saving unknown images with their labels.
 
-This `main` branch contains code for training models, while the `noetic` branch contains ROS code for deploying on mobile robots.
+This `main` branch contains code for training the open set object detector that is deployed on mobile robots.
+
+Other git repos that are required include 
+- a [ROS noetic image detection package](https://github.com/satomm1/image_detection_with_unknowns) for deploying on a mobile robot
+- a [repo](https://github.com/satomm1/gemini_api) that serves as the api for the LLM queries
 
 ## Installation (Linux)
 **Step 1**: Clone this repo
@@ -16,7 +20,6 @@ conda activate detect
 ```
 If using a GPU you must install [PyTorch](https://pytorch.org/get-started/locally/) first. Then install [Ultralytics](https://docs.ultralytics.com/quickstart/)>=8.3.80 (`pip install ultralytics`). Other Python packages you need are:
 - google-generativeai (`pip install google-generativeai`)
-- ...
 
 **Step 3**: Get a [Gemini API key](https://aistudio.google.com/apikey). After you have an API key, set the key to a local environment variable:
 ```
@@ -90,5 +93,30 @@ After training, move the model weights into the `/weights` directory with name `
 . eval.sh
 ```
 
+## Retraining the model
+You should collect the data with new labels that you wish to learn. This updated data should be placed in the `/updated_data/` directory as follows:
+```
+updated_data/
+├── train
+│   ├── images
+│   └── labels
+├── val
+│   ├── images
+│   └── labels
+├── test
+│   ├── images
+│   └── labels
+``` 
+Make sure to copy the original COCO labels from the `/data` directory too.
+
+To retrain, update the `updated_data.yaml` file to include your new objects. Then run the retraining script:
+```
+. retrain.sh
+```
+Evaluating the new model can be done with:
+```
+. eval_retrained.sh
+```
+
 ## Deploying the model
-...
+Take your desired model files and use them in this [repo](https://github.com/satomm1/image_detection_with_unknowns) for deployment using ROS.
